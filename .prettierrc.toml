@@ -1,0 +1,4 @@
+tabWidth = 2
+singleQuote = false
+indentStyle = "tab"
+indentSize = 2
