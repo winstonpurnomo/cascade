@@ -2,6 +2,7 @@ import express from "express";
 import { initCascade } from "@cascade/core";
 import * as cascadeExpress from "@cascade/core/adapters/express";
 import * as v from "valibot";
+import { google } from "@ai-sdk/google";
 
 type Context = {
   req: express.Request;
@@ -13,7 +14,7 @@ const numConverter = t.newTool({
   id: "numConverter",
   input: v.string(),
   output: v.number(),
-  execute: ({ context, input }) => {
+  execute: ({ context: _, input }) => {
     return Number.parseInt(input);
   },
 });
@@ -29,6 +30,7 @@ const registry = t.registry({
         return x.name;
       },
       output: v.string(),
+      llm: google("gemini-2.0-flash"),
       tools: [numConverter],
     }),
   },
