@@ -10,8 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@cascade/core": "workspace:*",
     "express": "^5.1.0",
-    "@cascade/core": "workspace:*"
+    "valibot": "^1.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.2"

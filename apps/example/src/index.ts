@@ -1,6 +1,7 @@
 import express from "express";
 import { initCascade } from "@cascade/core";
 import * as cascadeExpress from "@cascade/core/adapters/express";
+import * as v from "valibot";
 
 type Context = {
   req: express.Request;
@@ -8,10 +9,33 @@ type Context = {
 
 const t = initCascade().context<Context>().create();
 
+const numConverter = t.newTool({
+  id: "numConverter",
+  input: v.string(),
+  output: v.number(),
+  execute: ({ context, input }) => {
+    return Number.parseInt(input);
+  },
+});
+
 const registry = t.registry({
-  agents: {},
+  agents: {
+    sayHello: t.newAgent({
+      id: "sayHello",
+      input: v.object({
+        name: v.string(),
+      }),
+      inputTransformer(x) {
+        return x.name;
+      },
+      output: v.string(),
+      tools: [numConverter],
+    }),
+  },
   workflows: {},
-  tools: {},
+  tools: {
+    numConverter,
+  },
 });
 
 const app = express();

@@ -28,7 +28,8 @@
   "license": "MIT",
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@standard-schema/spec": "^1.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.2",
