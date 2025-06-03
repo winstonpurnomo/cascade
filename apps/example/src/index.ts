@@ -37,7 +37,7 @@ const secondStep = t.newStep({
   },
 });
 
-const workflow = t
+const myWorkflow = t
   .newWorkflow({
     id: "workflow",
     input: v.string(),
@@ -63,7 +63,9 @@ const registry = t.registry({
       tools: [numConverter],
     }),
   },
-  workflows: {},
+  workflows: {
+    myWorkflow,
+  },
   tools: {
     numConverter,
   },
