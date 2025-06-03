@@ -46,4 +46,16 @@ export class TWorkflow<
 
     return newWorkflow;
   }
+
+  /**
+   * Finalise the workflow.
+   * The special `this` parameter enforces at compile time that
+   * `TCurrentOutput` and `TOutput` are the same.
+   * If they differ, calling `.build()` will be a type error.
+   */
+  public build(
+    this: TWorkflow<TInput, TOutput, TOutput, TContext>,
+  ): TWorkflow<TInput, TOutput, TOutput, TContext> {
+    return this;
+  }
 }

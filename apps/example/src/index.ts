@@ -41,10 +41,11 @@ const workflow = t
   .newWorkflow({
     id: "workflow",
     input: v.string(),
-    output: v.number(),
+    output: v.boolean(),
   })
   .addStep(firstStep)
-  .addStep(secondStep);
+  .addStep(secondStep)
+  .build();
 
 const registry = t.registry({
   agents: {
