@@ -1,7 +1,7 @@
 import { BaseContext } from "./index.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
-export type TToolArgs<
+export type TStepArgs<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
@@ -20,7 +20,7 @@ export type TToolArgs<
     | StandardSchemaV1.InferOutput<TOutput>;
 };
 
-export class TTool<
+export class TStep<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
@@ -43,7 +43,7 @@ export class TTool<
     input,
     output,
     execute,
-  }: TToolArgs<TInput, TOutput, TContext>) {
+  }: TStepArgs<TInput, TOutput, TContext>) {
     this.id = id;
     this.input = input;
     this.output = output;

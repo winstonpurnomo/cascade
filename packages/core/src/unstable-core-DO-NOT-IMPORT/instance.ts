@@ -1,7 +1,9 @@
 import { BaseContext } from "./index.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { TTool } from "./tool.js";
+import { TTool, TToolArgs } from "./tool.js";
 import { TAgent, TAgentArgs } from "./agent.js";
+import { TStep, TStepArgs } from "./step.js";
+import { TWorkflow, TWorkflowArgs } from "./workflow.js";
 
 export class CascadeInstance<TContext extends BaseContext = BaseContext> {
   instance: {
@@ -30,36 +32,28 @@ export class CascadeInstance<TContext extends BaseContext = BaseContext> {
     return;
   }
 
-  newTool<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>({
-    id,
-    input,
-    output,
-    execute,
-  }: {
-    id: string;
-    input: TInput;
-    output: TOutput;
-    execute: ({
-      context,
-      input,
-    }: {
-      context: TContext;
-      input: StandardSchemaV1.InferInput<TInput>;
-    }) =>
-      | Promise<StandardSchemaV1.InferOutput<TOutput>>
-      | StandardSchemaV1.InferOutput<TOutput>;
-  }) {
-    return new TTool({
-      id,
-      input,
-      output,
-      execute,
-    });
+  newTool<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
+    args: TToolArgs<TInput, TOutput, TContext>,
+  ) {
+    return new TTool(args);
   }
 
   newAgent<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
     args: TAgentArgs<TInput, TOutput>,
   ) {
     return new TAgent(args);
+  }
+
+  newStep<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
+    args: TStepArgs<TInput, TOutput, TContext>,
+  ) {
+    return new TStep(args);
+  }
+
+  newWorkflow<
+    TInput extends StandardSchemaV1,
+    TOutput extends StandardSchemaV1,
+  >(args: TWorkflowArgs<TInput, TOutput, TContext>) {
+    return new TWorkflow(args);
   }
 }
