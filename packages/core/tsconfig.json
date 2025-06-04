@@ -9,6 +9,9 @@
     "strict": true,
     "paths": {
       "@cascade/core": ["./src/index.ts"],
+      "@cascade/core/unstable-core-DO-NOT-IMPORT": [
+        "./src/unstable-core-DO-NOT-IMPORT/index.ts"
+      ],
       "@cascade/core/adapters/*": ["./src/adapters/*"]
     }
   }

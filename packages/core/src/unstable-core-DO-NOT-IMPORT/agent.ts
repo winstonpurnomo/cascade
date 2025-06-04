@@ -1,4 +1,4 @@
-import { BaseContext } from "./index.js";
+import { BaseContext } from "./types.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { TTool } from "./tool.js";
 import type { LanguageModelV1 } from "@ai-sdk/provider";

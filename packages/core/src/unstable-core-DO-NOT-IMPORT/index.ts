@@ -1,8 +1,5 @@
 import { CascadeInstance } from "./instance.js";
-
-export interface BaseContext {
-  [key: string]: any;
-}
+import { BaseContext } from "./types.js";
 
 export class CascadeBuilder<TContext extends BaseContext = BaseContext> {
   context<TNewContext extends BaseContext>(): CascadeBuilder<TNewContext> {
@@ -19,4 +16,5 @@ export function initCascade(): CascadeBuilder {
   return new CascadeBuilder();
 }
 
+export { CascadeInstance } from "./instance.js";
 export * from "./instance.js";

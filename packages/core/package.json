@@ -10,6 +10,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.mjs"
     },
+    "./unstable-core-DO-NOT-IMPORT": {
+      "types": "./dist/unstable-core-DO-NOT-IMPORT/index.d.ts",
+      "default": "./dist/unstable-core-DO-NOT-IMPORT/index.mjs"
+    },
     "./adapters/*": {
       "types": "./dist/adapters/*.d.ts",
       "default": "./dist/adapters/*.mjs"

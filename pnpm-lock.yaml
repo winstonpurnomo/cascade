@@ -97,6 +97,9 @@ importers:
       '@ai-sdk/provider':
         specifier: ^1.1.3
         version: 1.1.3
+      '@cascade/core':
+        specifier: workspace:*
+        version: link:../core
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction, RequestHandler } from "express";
-import type { CascadeInstance, BaseContext } from "@cascade/core";
+import type { BaseContext, CascadeInstance } from "@cascade/core";
 
 export interface CreateContextOptions {
   req: Request;

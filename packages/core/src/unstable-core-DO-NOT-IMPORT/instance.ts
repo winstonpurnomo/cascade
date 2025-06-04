@@ -1,4 +1,4 @@
-import { BaseContext } from "./index.js";
+import { BaseContext } from "./types.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { TTool, TToolArgs } from "./tool.js";
 import { TAgent, TAgentArgs } from "./agent.js";

@@ -1,5 +1,5 @@
 import { TArgs } from "./args.js";
-import { BaseContext } from "./index.js";
+import { BaseContext } from "./types.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 export type TToolArgs<

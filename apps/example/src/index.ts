@@ -73,6 +73,8 @@ const registry = t.registry({
   },
 });
 
+type Registry = typeof registry;
+
 registry.workflow("myWorkflow").build().call("1", {
   env: "DEV",
 });
@@ -97,4 +99,4 @@ app.get(
   }),
 );
 
-const client = createCascadeClient();
+const client = createCascadeClient<Registry>();
