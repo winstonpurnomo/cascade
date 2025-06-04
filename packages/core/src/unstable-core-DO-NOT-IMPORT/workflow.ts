@@ -1,4 +1,3 @@
-// workflow.ts
 import { BaseContext } from "./types.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { TStep, TStepArgs } from "./step.js";
