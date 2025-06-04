@@ -1,6 +1,6 @@
 import express from "express";
-import { initCascade } from "@cascade/core";
-import * as cascadeExpress from "@cascade/core/adapters/express";
+import { initCascade } from "@cascade-ai/core";
+import * as cascadeExpress from "@cascade-ai/core/adapters/express";
 import { createCascadeClient } from "@cascade/client";
 import * as v from "valibot";
 import { google } from "@ai-sdk/google";

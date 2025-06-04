@@ -34,9 +34,9 @@ mkdir cascade-product-agent
 cd cascade-product-agent
 
 npm init -y
-npm install @cascade/core @cascade/client @ai-sdk/google valibot express
+npm install @cascade-ai/core @cascade/client @ai-sdk/google valibot express
 # Or using pnpm
-# pnpm add @cascade/core @cascade/client @ai-sdk/google valibot express
+# pnpm add @cascade-ai/core @cascade/client @ai-sdk/google valibot express
 ```
 
 You'll also need to set up TypeScript if you haven't already:
@@ -74,7 +74,7 @@ Let's start by initializing Cascade and defining our application context. The co
 Create a file `src/cascade.ts`:
 
 ```typescript filename="src/cascade.ts"
-import { initCascade } from "@cascade/core";
+import { initCascade } from "@cascade-ai/core";
 import * as v from "valibot"; // We'll use Valibot for schema validation
 
 // Define the shape of our application's context
@@ -375,7 +375,7 @@ Create `src/server.ts`:
 ```typescript filename="src/server.ts"
 import express from "express";
 import { t, AppContext } from "./cascade"; // Assuming t is exported from cascade.ts
-import * as cascadeExpress from "@cascade/core/adapters/express";
+import * as cascadeExpress from "@cascade-ai/core/adapters/express";
 import { registry } from "./registry"; // Your registry
 
 const app = express();

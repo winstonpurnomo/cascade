@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/google": "^1.2.19",
-    "@cascade/core": "workspace:*",
+    "@cascade-ai/core": "workspace:*",
     "@cascade/client": "workspace:*",
     "ai": "^4.3.16",
     "express": "^5.1.0",

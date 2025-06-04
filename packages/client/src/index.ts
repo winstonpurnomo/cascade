@@ -1,9 +1,9 @@
-import { CascadeInstance } from "@cascade/core/unstable-core-DO-NOT-IMPORT";
+import { CascadeInstance } from "@cascade-ai/core/unstable-core-DO-NOT-IMPORT";
 import {
   TAgent,
   TTool,
   TWorkflow,
-} from "@cascade/core/unstable-core-DO-NOT-IMPORT";
+} from "@cascade-ai/core/unstable-core-DO-NOT-IMPORT";
 
 // Extract the registry components from a CascadeInstance
 type ExtractFromCascadeInstance<T> =
