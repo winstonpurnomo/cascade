@@ -1,5 +1,6 @@
 import { t } from "./helpers";
 import { z } from "zod/v4";
+import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 import { MockLanguageModelV1 } from "ai/test";
 
@@ -24,6 +25,26 @@ describe("Agent", () => {
     const agent = t.newAgent({
       id: "testAgent",
       input: z.string(),
+      output: z.object({
+        text: z.string(),
+      }),
+      inputTransformer: (input) => input,
+      instructions: "Help the user",
+      // We call expect inside the mock model to validate the prompt and mode
+      llm: mockModel({ prompt: "What is the answer?" }),
+      tools: [],
+    });
+
+    const out = await agent.call("What is the answer?", { env: "test" });
+    expect(out).toEqual({ text: "The answer is 42" });
+  });
+});
+
+describe("Agent should work with any Standard Schema", () => {
+  it("such as valibot", async () => {
+    const agent = t.newAgent({
+      id: "testAgent",
+      input: v.string(),
       output: z.object({
         text: z.string(),
       }),
