@@ -47,7 +47,8 @@
     "prettier": "^3.5.3",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.0"
+    "vitest": "^3.2.0",
+    "zod": "^3.25.51"
   },
   "peerDependencies": {
     "@ai-sdk/provider": "^1.1.3",

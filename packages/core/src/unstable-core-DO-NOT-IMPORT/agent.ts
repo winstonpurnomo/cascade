@@ -59,13 +59,17 @@ export class TAgent<
     this.tools = tools;
   }
 
-  async call(input: StandardSchemaV1.InferInput<TInput>, context: TContext) {
+  async call(
+    input: StandardSchemaV1.InferInput<TInput>,
+    context: TContext,
+  ): Promise<StandardSchemaV1.InferOutput<TOutput>> {
     const processedInput = await this.inputTransformer(input);
     // The AI SDK does not natively support Standard Schema, so we need to convert it to a JSON schema
     const schema = await toJsonSchema(this.output);
+
     const { object } = await generateObject({
       model: this.llm,
-      prompt: "What is the answer?",
+      mode: "json",
       messages: [
         {
           role: "user",
@@ -74,6 +78,7 @@ export class TAgent<
       ],
       schema: jsonSchema(schema),
     });
+
     let outputAsTypeSafe = this.output["~standard"].validate(object);
     if (outputAsTypeSafe instanceof Promise) {
       outputAsTypeSafe = await outputAsTypeSafe;

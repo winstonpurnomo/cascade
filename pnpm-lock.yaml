@@ -34,16 +34,16 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: ^1.2.19
-        version: 1.2.19(zod@3.25.49)
+        version: 1.2.19(zod@3.25.51)
+      '@cascade-ai/client':
+        specifier: workspace:*
+        version: link:../../packages/client
       '@cascade-ai/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cascade/client':
-        specifier: workspace:*
-        version: link:../../packages/client
       ai:
         specifier: ^4.3.16
-        version: 4.3.16(react@19.1.0)(zod@3.25.49)
+        version: 4.3.16(react@19.1.0)(zod@3.25.51)
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -163,22 +163,19 @@ importers:
         version: link:../typescript-config
       '@standard-community/standard-json':
         specifier: ^0.2.0
-        version: 0.2.0(@valibot/to-json-schema@1.3.0(valibot@1.1.0(typescript@5.8.3)))(zod-to-json-schema@3.24.5(zod@3.25.49))
+        version: 0.2.0(@valibot/to-json-schema@1.3.0(valibot@1.1.0(typescript@5.8.3)))(zod-to-json-schema@3.24.5(zod@3.25.51))
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.0.0
       ai:
         specifier: ^4.3.16
-        version: 4.3.16(react@19.1.0)(zod@3.25.49)
+        version: 4.3.16(react@19.1.0)(zod@3.25.51)
       express:
         specifier: ^5.1.0
         version: 5.1.0
       hono:
         specifier: ^4.7.11
         version: 4.7.11
-      zod:
-        specifier: ^3.25.0
-        version: 3.25.49
     devDependencies:
       '@types/express':
         specifier: ^5.0.2
@@ -210,6 +207,9 @@ importers:
       vitest:
         specifier: ^3.2.0
         version: 3.2.0(@types/debug@4.1.12)(@types/node@22.15.29)
+      zod:
+        specifier: ^3.25.51
+        version: 3.25.51
 
   packages/eslint-config:
     devDependencies:
@@ -4756,16 +4756,19 @@ packages:
   zod@3.25.49:
     resolution: {integrity: sha512-JMMPMy9ZBk3XFEdbM3iL1brx4NUSejd6xr3ELrrGEfGb355gjhiAWtG3K5o+AViV/3ZfkIrCzXsZn6SbLwTR8Q==}
 
+  zod@3.25.51:
+    resolution: {integrity: sha512-TQSnBldh+XSGL+opiSIq0575wvDPqu09AqWe1F7JhUMKY+M91/aGlK4MhpVNO7MgYfHcVCB1ffwAUTJzllKJqg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
 
-  '@ai-sdk/google@1.2.19(zod@3.25.49)':
+  '@ai-sdk/google@1.2.19(zod@3.25.51)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.49)
-      zod: 3.25.49
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.51)
+      zod: 3.25.51
 
   '@ai-sdk/provider-utils@2.2.8(zod@3.25.49)':
     dependencies:
@@ -4773,6 +4776,13 @@ snapshots:
       nanoid: 3.3.11
       secure-json-parse: 2.7.0
       zod: 3.25.49
+
+  '@ai-sdk/provider-utils@2.2.8(zod@3.25.51)':
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      nanoid: 3.3.11
+      secure-json-parse: 2.7.0
+      zod: 3.25.51
 
   '@ai-sdk/provider@1.1.3':
     dependencies:
@@ -4788,12 +4798,29 @@ snapshots:
     optionalDependencies:
       zod: 3.25.49
 
+  '@ai-sdk/react@1.2.12(react@19.1.0)(zod@3.25.51)':
+    dependencies:
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.51)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.51)
+      react: 19.1.0
+      swr: 2.3.3(react@19.1.0)
+      throttleit: 2.1.0
+    optionalDependencies:
+      zod: 3.25.51
+
   '@ai-sdk/ui-utils@1.2.11(zod@3.25.49)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       '@ai-sdk/provider-utils': 2.2.8(zod@3.25.49)
       zod: 3.25.49
       zod-to-json-schema: 3.24.5(zod@3.25.49)
+
+  '@ai-sdk/ui-utils@1.2.11(zod@3.25.51)':
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.51)
+      zod: 3.25.51
+      zod-to-json-schema: 3.24.5(zod@3.25.51)
 
   '@astrojs/compiler@2.12.0': {}
 
@@ -5506,6 +5533,11 @@ snapshots:
       '@valibot/to-json-schema': 1.3.0(valibot@1.1.0(typescript@5.8.3))
       zod-to-json-schema: 3.24.5(zod@3.25.49)
 
+  '@standard-community/standard-json@0.2.0(@valibot/to-json-schema@1.3.0(valibot@1.1.0(typescript@5.8.3)))(zod-to-json-schema@3.24.5(zod@3.25.51))':
+    optionalDependencies:
+      '@valibot/to-json-schema': 1.3.0(valibot@1.1.0(typescript@5.8.3))
+      zod-to-json-schema: 3.24.5(zod@3.25.51)
+
   '@standard-schema/spec@1.0.0': {}
 
   '@swc/counter@0.1.3': {}
@@ -5971,6 +6003,18 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       jsondiffpatch: 0.6.0
       zod: 3.25.49
+    optionalDependencies:
+      react: 19.1.0
+
+  ai@4.3.16(react@19.1.0)(zod@3.25.51):
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.51)
+      '@ai-sdk/react': 1.2.12(react@19.1.0)(zod@3.25.51)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.51)
+      '@opentelemetry/api': 1.9.0
+      jsondiffpatch: 0.6.0
+      zod: 3.25.51
     optionalDependencies:
       react: 19.1.0
 
@@ -10242,11 +10286,17 @@ snapshots:
     dependencies:
       zod: 3.25.49
 
+  zod-to-json-schema@3.24.5(zod@3.25.51):
+    dependencies:
+      zod: 3.25.51
+
   zod-to-ts@1.2.0(typescript@5.8.3)(zod@3.25.49):
     dependencies:
       typescript: 5.8.3
       zod: 3.25.49
 
   zod@3.25.49: {}
+
+  zod@3.25.51: {}
 
   zwitch@2.0.4: {}
