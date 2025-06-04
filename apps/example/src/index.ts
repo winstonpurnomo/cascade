@@ -5,7 +5,7 @@ import * as v from "valibot";
 import { google } from "@ai-sdk/google";
 
 type Context = {
-  req: express.Request;
+  env: string;
 };
 
 const t = initCascade().context<Context>().create();
@@ -44,8 +44,7 @@ const myWorkflow = t
     output: v.boolean(),
   })
   .addStep(firstStep)
-  .addStep(secondStep)
-  .build();
+  .addStep(secondStep);
 
 const registry = t.registry({
   agents: {
@@ -71,6 +70,10 @@ const registry = t.registry({
   },
 });
 
+registry.workflow("myWorkflow").build().call("1", {
+  env: "DEV",
+});
+
 const app = express();
 
 const createContext = ({
@@ -80,7 +83,7 @@ const createContext = ({
   req: express.Request;
   res: express.Response;
 }) => ({
-  req,
+  env: process.env.NODE_ENV ?? "",
 });
 
 app.get(
