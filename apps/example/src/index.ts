@@ -33,7 +33,9 @@ const secondStep = t.newStep({
   id: "secondStep",
   input: v.number(),
   output: v.boolean(),
-  execute: ({ context: _, input }) => {
+  dependencies: [firstStep],
+  execute: ({ context: _, input, workflowContext }) => {
+    const firstResult = workflowContext.getStepOutput(firstStep);
     return true;
   },
 });
@@ -46,6 +48,25 @@ const myWorkflow = t
   })
   .addStep(firstStep)
   .addStep(secondStep);
+
+const newFirstStep = t.newStep({
+  id: "firstStep2",
+  input: v.string(),
+  output: v.string(),
+  execute: ({ context: _, input }) => {
+    return input;
+  },
+});
+
+const newSecondStep = t.newStep({
+  id: "secondStep2",
+  input: v.string(),
+  output: v.string(),
+  dependencies: [newFirstStep],
+  execute: ({ context: _, input }) => {
+    return input;
+  },
+});
 
 const agent = t.newAgent({
   id: "sayHello",

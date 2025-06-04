@@ -1,7 +1,9 @@
+// workflow.ts
 import { BaseContext } from "./types.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { TStep, TStepArgs } from "./step.js";
 import { TArgs } from "./args.js";
+import { WorkflowContext } from "./workflow-context.js";
 
 export type TWorkflowArgs<
   TInput extends StandardSchemaV1,
@@ -18,7 +20,8 @@ export class TWorkflow<
   TContext extends BaseContext = BaseContext,
   TBuilt extends TBuiltState = false,
 > {
-  private readonly steps: Array<TStepArgs<any, any, TContext>> = [];
+  private readonly steps: Array<TStep<any, any, TContext>> = [];
+  private addedSteps: Set<string> = new Set();
   id: string;
   input: TInput;
   output: TOutput;
@@ -32,8 +35,17 @@ export class TWorkflow<
 
   public addStep<TNextOutput extends StandardSchemaV1>(
     this: TWorkflow<TInput, TCurrentOutput, TOutput, TContext, false>,
-    step: TStepArgs<TCurrentOutput, TNextOutput, TContext>,
+    step: TStep<TCurrentOutput, TNextOutput, TContext>,
   ): TWorkflow<TInput, TNextOutput, TOutput, TContext, false> {
+    // Validate dependencies are already added
+    for (const dependency of step.dependencies) {
+      if (!this.addedSteps.has(dependency.id)) {
+        throw new Error(
+          `Step "${step.id}" depends on "${dependency.id}" which hasn't been added to the workflow yet`,
+        );
+      }
+    }
+
     // Clone the current workflow and add the step
     const newWorkflow = new TWorkflow<
       TInput,
@@ -46,10 +58,12 @@ export class TWorkflow<
       input: this.input,
       output: this.output,
     });
-    // Copy existing steps
+
+    // Copy existing steps and state
     newWorkflow.steps.push(...this.steps);
-    // Add the new step
     newWorkflow.steps.push(step);
+    newWorkflow.addedSteps = new Set([...this.addedSteps, step.id]);
+
     return newWorkflow;
   }
 
@@ -70,7 +84,7 @@ export class TWorkflowExecutor<
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
 > {
-  private readonly steps: Array<TStepArgs<any, any, TContext>>;
+  private readonly steps: Array<TStep<any, any, TContext>>;
   readonly id: string;
   readonly input: TInput;
   readonly output: TOutput;
@@ -84,7 +98,7 @@ export class TWorkflowExecutor<
     id: string;
     input: TInput;
     output: TOutput;
-    steps: Array<TStepArgs<any, any, TContext>>;
+    steps: Array<TStep<any, any, TContext>>;
   }) {
     this.id = id;
     this.input = input;
@@ -96,11 +110,19 @@ export class TWorkflowExecutor<
     args: StandardSchemaV1.InferInput<TInput>,
     context: TContext,
   ): Promise<StandardSchemaV1.InferOutput<TOutput>> {
-    const input = args;
-    let output = input;
+    const workflowContext = new WorkflowContext();
+    let output = args;
+
     for (const step of this.steps) {
-      output = await step.execute({ context, input: output });
+      const stepOutput = await step.execute({
+        context,
+        input: output,
+        workflowContext,
+      });
+      workflowContext.setStepOutput(step.id, stepOutput);
+      output = stepOutput;
     }
+
     return output;
   }
 }
