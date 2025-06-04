@@ -17,4 +17,8 @@ export function initCascade(): CascadeBuilder {
 }
 
 export { CascadeInstance } from "./instance.js";
+export { TAgent } from "./agent.js";
+export { TTool } from "./tool.js";
+export { TStep } from "./step.js";
+export { TWorkflow } from "./workflow.js";
 export * from "./instance.js";

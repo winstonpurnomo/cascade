@@ -100,3 +100,6 @@ app.get(
 );
 
 const client = createCascadeClient<Registry>();
+const a = client.agents.sayHello;
+
+const w = client.workflows; // autosuggestion for workflow names; type is { myWorkflow: TWorkflow<v.StringSchema<undefined>, v.BooleanSchema<undefined>, v.BooleanSchema<undefined>, Context, false>; }

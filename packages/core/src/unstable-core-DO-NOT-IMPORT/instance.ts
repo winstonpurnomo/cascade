@@ -26,17 +26,16 @@ export class CascadeInstance<
   }
 
   registry<
-    TNewAgents extends Record<string, TAgent<any, any, TContext>>,
-    TNewWorkflows extends Record<string, TWorkflow<any, any, any, TContext>>,
-    TNewTools extends Record<string, TTool<any, any, TContext>>,
-  >({
-    agents,
-    workflows,
-    tools,
-  }: {
-    agents: { [K in keyof TNewAgents]: TAgentArgs<any, any> };
-    workflows: { [K in keyof TNewWorkflows]: TNewWorkflows[K] };
-    tools: { [K in keyof TNewTools]: TToolArgs<any, any, TContext> };
+    const TNewAgents extends Record<string, TAgent<any, any, TContext>>,
+    const TNewWorkflows extends Record<
+      string,
+      TWorkflow<any, any, any, TContext>
+    >,
+    const TNewTools extends Record<string, TTool<any, any, TContext>>,
+  >(config: {
+    agents: TNewAgents;
+    workflows: TNewWorkflows;
+    tools: TNewTools;
   }): CascadeInstance<TContext, TNewAgents, TNewWorkflows, TNewTools> {
     const newInstance = new CascadeInstance<
       TContext,
@@ -45,16 +44,9 @@ export class CascadeInstance<
       TNewTools
     >();
 
-    newInstance.instance.agents = Object.fromEntries(
-      Object.entries(agents).map(([name, args]) => [name, new TAgent(args)]),
-    ) as TNewAgents;
-
-    newInstance.instance.workflows = workflows as TNewWorkflows;
-
-    newInstance.instance.tools = Object.fromEntries(
-      Object.entries(tools).map(([name, args]) => [name, new TTool(args)]),
-    ) as TNewTools;
-
+    newInstance.instance.agents = config.agents;
+    newInstance.instance.workflows = config.workflows;
+    newInstance.instance.tools = config.tools;
     return newInstance;
   }
 
