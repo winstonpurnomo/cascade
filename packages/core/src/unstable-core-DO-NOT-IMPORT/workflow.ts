@@ -1,16 +1,13 @@
 import { BaseContext } from "./index.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { TStep, TStepArgs } from "./step.js";
+import { TArgs } from "./args.js";
 
 export type TWorkflowArgs<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
-> = {
-  id: string;
-  input: TInput;
-  output: TOutput;
-};
+> = TArgs<TInput, TOutput, TContext>;
 
 type TBuiltState = boolean;
 

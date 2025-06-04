@@ -4,6 +4,7 @@ import { TTool } from "./tool.js";
 import type { LanguageModelV1 } from "@ai-sdk/provider";
 import { generateObject, jsonSchema } from "ai";
 import { toJsonSchema } from "@standard-community/standard-json";
+import { TArgs } from "./args.js";
 
 type AgentInput =
   | string
@@ -15,16 +16,14 @@ type AgentInput =
 export type TAgentArgs<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
-> = {
-  id: string;
-  input: TInput;
+  TContext extends BaseContext = BaseContext,
+> = TArgs<TInput, TOutput> & {
   inputTransformer: (
     input: StandardSchemaV1.InferInput<TInput>,
   ) => Promise<AgentInput> | AgentInput;
   instructions: string;
-  output: TOutput;
   llm: LanguageModelV1;
-  tools: TTool<any, any, any>[];
+  tools: TTool<any, any, any>[]; // TODO: Make this a generic type
 };
 
 export class TAgent<
@@ -50,7 +49,7 @@ export class TAgent<
     output,
     llm,
     tools,
-  }: TAgentArgs<TInput, TOutput>) {
+  }: TAgentArgs<TInput, TOutput, TContext>) {
     this.id = id;
     this.input = input;
     this.inputTransformer = inputTransformer;

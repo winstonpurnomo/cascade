@@ -92,7 +92,7 @@ export class CascadeInstance<
   }
 
   newAgent<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
-    args: TAgentArgs<TInput, TOutput>,
+    args: TAgentArgs<TInput, TOutput, TContext>,
   ) {
     return new TAgent(args);
   }

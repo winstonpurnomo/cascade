@@ -1,6 +1,7 @@
 import express from "express";
 import { initCascade } from "@cascade/core";
 import * as cascadeExpress from "@cascade/core/adapters/express";
+import { createCascadeClient } from "@cascade/client";
 import * as v from "valibot";
 import { google } from "@ai-sdk/google";
 
@@ -46,21 +47,23 @@ const myWorkflow = t
   .addStep(firstStep)
   .addStep(secondStep);
 
+const agent = t.newAgent({
+  id: "sayHello",
+  input: v.object({
+    name: v.string(),
+  }),
+  inputTransformer(x) {
+    return x.name;
+  },
+  instructions: "Say hello to the user",
+  output: v.string(),
+  llm: google("gemini-2.0-flash"),
+  tools: [numConverter],
+});
+
 const registry = t.registry({
   agents: {
-    sayHello: t.newAgent({
-      id: "sayHello",
-      input: v.object({
-        name: v.string(),
-      }),
-      inputTransformer(x) {
-        return x.name;
-      },
-      instructions: "Say hello to the user",
-      output: v.string(),
-      llm: google("gemini-2.0-flash"),
-      tools: [numConverter],
-    }),
+    sayHello: agent,
   },
   workflows: {
     myWorkflow,
@@ -93,3 +96,5 @@ app.get(
     instance: t,
   }),
 );
+
+const client = createCascadeClient();
