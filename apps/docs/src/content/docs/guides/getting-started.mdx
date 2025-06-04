@@ -1,0 +1,481 @@
+---
+title: Getting Started with Cascade
+description: Build your first AI agent and understand the core concepts of Cascade.
+---
+
+# Getting Started with Cascade
+
+Welcome to Cascade! Cascade is a powerful TypeScript-first framework for building, managing, and deploying AI agents, tools, and workflows. It provides a structured and type-safe way to orchestrate Large Language Models (LLMs), custom business logic (Tools), and complex multi-step processes (Workflows).
+
+In this guide, we'll walk you through building a simple "Product Inquiry Agent" that can fetch product information using a custom tool and an LLM.
+
+## Core Concepts
+
+Before we dive in, let's briefly touch upon some core Cascade concepts:
+
+- **Tools (`t.newTool`)**: Reusable pieces of code that perform specific actions, like fetching data from an API, querying a database, or performing calculations. Tools have defined input and output schemas.
+- **Steps (`t.newStep`)**: The building blocks of Workflows. Each step takes an input, performs an action (often calling a tool or custom logic), and produces an output. Steps can depend on the output of previous steps.
+- **Workflows (`t.newWorkflow`)**: Sequences of Steps that define a multi-stage process. They allow you to chain operations together in a type-safe manner.
+- **Agents (`t.newAgent`)**: LLM-powered entities that can understand instructions, use Tools to gather information or perform actions, and generate responses.
+- **Registry (`t.registry`)**: A central place to register all your agents, workflows, and tools, making them discoverable and executable.
+- **Context**: An object that can be passed through your tools, steps, agents, and workflows, allowing you to share common resources like API keys, database connections, or environment variables.
+
+## Prerequisites
+
+- Node.js (v18 or later recommended)
+- An API key for an LLM provider (e.g., Google Gemini). We'll use Google Gemini in this example.
+
+## 1. Project Setup
+
+First, create a new Node.js project and install the necessary Cascade packages. We use the AI SDK to call large-language models, and you can bring any Standard Schema-compliant validator library for type enforcement.
+
+```bash
+mkdir cascade-product-agent
+cd cascade-product-agent
+
+npm init -y
+npm install @cascade/core @cascade/client @ai-sdk/google valibot express
+# Or using pnpm
+# pnpm add @cascade/core @cascade/client @ai-sdk/google valibot express
+```
+
+You'll also need to set up TypeScript if you haven't already:
+
+```bash
+npm install -D typescript @types/node @types/express
+# Or using yarn
+# yarn add -D typescript @types/node @types/express
+npx tsc --init
+```
+
+Make sure your `tsconfig.json` has `esModuleInterop` and `moduleResolution` set appropriately, for example:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext", // or ESNext
+    "moduleResolution": "NodeNext", // or Bundler
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    // ... other options
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
+```
+
+## 2. Initializing Cascade
+
+Let's start by initializing Cascade and defining our application context. The context can hold shared data like environment variables or API keys.
+
+Create a file `src/cascade.ts`:
+
+```typescript filename="src/cascade.ts"
+import { initCascade } from "@cascade/core";
+import * as v from "valibot"; // We'll use Valibot for schema validation
+
+// Define the shape of our application's context
+export type AppContext = {
+  env: string;
+  // You could add API keys or other shared resources here
+  mockProductApiKey?: string;
+};
+
+// Initialize Cascade with our context type
+const t = initCascade().context<AppContext>().create();
+
+export { t, v };
+```
+
+## 3. Defining a Custom Tool
+
+Our agent will need to fetch product information. Let's create a tool for this. This tool will simulate fetching data from a product database.
+
+Create `src/tools.ts`:
+
+```typescript filename="src/tools.ts"
+import { t, v, AppContext } from "./cascade"; // Import from our cascade.ts
+
+// Mock product database
+const mockProductDatabase: Record<
+  string,
+  { description: string; price: number; stock: number }
+> = {
+  widget: { description: "A high-quality widget.", price: 19.99, stock: 150 },
+  gadget: { description: "A fancy new gadget.", price: 49.5, stock: 75 },
+  thingamajig: {
+    description: "An essential thingamajig.",
+    price: 5.0,
+    stock: 0,
+  },
+};
+
+export const productInfoTool = t.newTool({
+  id: "productInfoTool",
+  description:
+    "Fetches information about a specific product, including its description, price, and stock level.",
+  input: v.object({
+    productName: v.string([v.minLength(1, "Product name cannot be empty.")]),
+  }),
+  output: v.object({
+    productName: v.string(),
+    description: v.string(),
+    price: v.number(),
+    stock: v.number(),
+    isAvailable: v.boolean(),
+  }),
+  execute: async ({ input, context }) => {
+    // Access context if needed, e.g., context.mockProductApiKey
+    console.log(
+      `Tool 'productInfoTool' called for: ${input.productName} in env: ${context.env}`,
+    );
+
+    const productNameLower = input.productName.toLowerCase();
+    const product = mockProductDatabase[productNameLower];
+
+    if (!product) {
+      throw new Error(`Product "${input.productName}" not found.`);
+    }
+
+    return {
+      productName: input.productName, // Return original casing for display
+      ...product,
+      isAvailable: product.stock > 0,
+    };
+  },
+});
+```
+
+```
+<Callout type="info">
+  Tools are the workhorses of Cascade. They encapsulate any piece of logic you
+  want your AI agents or workflows to use.
+</Callout>
+```
+
+## 4. Creating an Agent
+
+Now, let's create an agent that uses our `productInfoTool` to answer user queries about products.
+
+Create `src/agents.ts`:
+
+```typescript filename="src/agents.ts"
+import { t, v } from "./cascade";
+import { productInfoTool } from "./tools";
+import { google } from "@ai-sdk/google"; // Or your preferred LLM provider
+
+export const productInquiryAgent = t.newAgent({
+  id: "productInquiryAgent",
+  input: v.object({
+    query: v.string([v.minLength(5, "Query is too short.")]),
+  }),
+  // Optional: Transform the raw input before passing it to the LLM
+  inputTransformer: (rawInput) => {
+    // We could do more complex transformations here if needed.
+    // For now, the LLM will get the full query.
+    return `User query: "${rawInput.query}"`;
+  },
+  instructions: `You are a helpful product inquiry assistant.
+Your goal is to answer user questions about products.
+Use the 'productInfoTool' to find information like description, price, and stock.
+If a product is out of stock, inform the user politely.
+Be concise and friendly.
+If you cannot find the product, say so.
+Do not make up information.
+Today's date is ${new Date().toLocaleDateString()}.`, // Example of dynamic instruction
+  output: v.object({
+    response: v.string(),
+    productFound: v.boolean(),
+    productName: v.optional(v.string()),
+  }),
+  // Define how the LLM's structured output maps to our agent's output schema
+  outputTransformer: (llmOutput, toolOutputs) => {
+    // llmOutput here is the raw string from the LLM if no structured output is used by the LLM,
+    // or the parsed object if the LLM supports structured output and it's configured.
+    // For simplicity, we'll assume the LLM directly provides a response.
+    // A more robust implementation might involve the LLM outputting a structured JSON
+    // that we then map to our agent's output schema.
+
+    // Let's check if the productInfoTool was called and successful
+    const productToolCall = toolOutputs.find(
+      (call) => call.toolName === "productInfoTool" && call.result,
+    );
+    let productFound = false;
+    let productName: string | undefined = undefined;
+
+    if (productToolCall && productToolCall.result) {
+      const toolResult = productToolCall.result as v.InferOutput<
+        typeof productInfoTool.output
+      >;
+      productFound = true;
+      productName = toolResult.productName;
+    }
+
+    // This is a simplified output transformer.
+    // Ideally, the LLM itself would be prompted to return a structure matching our output schema.
+    // Or, we'd parse the LLM's natural language response to populate these fields.
+    // For now, we'll assume the LLM's response is the main part.
+    return {
+      response:
+        typeof llmOutput === "string" ? llmOutput : JSON.stringify(llmOutput),
+      productFound,
+      productName,
+    };
+  },
+  llm: google("models/gemini-1.5-flash-latest"), // Replace with your Gemini model
+  tools: [productInfoTool],
+});
+```
+
+```
+<Callout type="warning">
+  Ensure your `GOOGLE_API_KEY` environment variable is set if you're using
+  Google Gemini.
+</Callout>
+```
+
+## 5. Registering Components
+
+To make our agent and tool executable, we need to register them.
+
+Create `src/registry.ts`:
+
+```typescript filename="src/registry.ts"
+import { t } from "./cascade";
+import { productInquiryAgent } from "./agents";
+import { productInfoTool } from "./tools";
+
+// Example Workflow (Optional for this guide, but good to show)
+const exampleWorkflow = t
+  .newWorkflow({
+    id: "exampleWorkflow",
+    input: v.string(),
+    output: v.object({
+      originalInput: v.string(),
+      message: v.string(),
+    }),
+  })
+  .addStep(
+    t.newStep({
+      id: "step1",
+      input: v.string(),
+      output: v.string(),
+      execute: async ({ input }) => `Processed: ${input}`,
+    }),
+  )
+  .addStep(
+    t.newStep({
+      id: "step2",
+      input: v.string(), // Receives output from step1
+      output: v.object({ originalInput: v.string(), message: v.string() }),
+      dependencies: [], // No explicit dependencies needed for simple chain
+      execute: async ({ input, workflowContext }) => {
+        // To get original workflow input if needed (not directly possible without passing it through)
+        // For this example, we'll just use the input from the previous step.
+        return {
+          originalInput: "N/A in this simple setup without explicit passing",
+          message: `Final step received: ${input}`,
+        };
+      },
+    }),
+  );
+
+export const registry = t.registry({
+  agents: {
+    productInquiryAgent,
+  },
+  tools: {
+    productInfoTool,
+  },
+  workflows: {
+    // You can add workflows here too
+    exampleWorkflow,
+  },
+});
+
+// Export the type of the registry for client-side type safety
+export type AppRegistry = typeof registry;
+```
+
+## 6. Running the Agent Locally
+
+Let's test our agent. Create `src/run-agent.ts`:
+
+```typescript filename="src/run-agent.ts"
+import { registry, AppRegistry } from "./registry"; // Import AppRegistry
+import { AppContext } from "./cascade";
+import { createCascadeClient } from "@cascade/client"; // For type inference, not actual client call here
+
+async function main() {
+  const context: AppContext = {
+    env: "development",
+    mockProductApiKey: "test-key-123", // Example context value
+  };
+
+  const agentToRun = registry.agent("productInquiryAgent");
+
+  console.log("Testing Product Inquiry Agent...");
+
+  const queries = [
+    "Tell me about the widget.",
+    "What's the price of a gadget?",
+    "Do you have any thingamajigs in stock?",
+    "I'm looking for a flux capacitor.",
+  ];
+
+  for (const query of queries) {
+    console.log(`\nUser Query: "${query}"`);
+    try {
+      const result = await agentToRun.call({ query }, context);
+      console.log("Agent Response:", result.response);
+      console.log("Product Found:", result.productFound);
+      if (result.productName) console.log("Product Name:", result.productName);
+    } catch (error) {
+      console.error("Agent Error:", error);
+    }
+  }
+
+  // Example of running a workflow
+  console.log("\nTesting Example Workflow...");
+  const workflowToRun = registry.workflow("exampleWorkflow").build();
+  try {
+    const workflowResult = await workflowToRun.call("Hello Workflow", context);
+    console.log("Workflow Result:", workflowResult);
+  } catch (error) {
+    console.error("Workflow Error:", error);
+  }
+}
+
+main().catch(console.error);
+```
+
+To run this, first compile your TypeScript:
+
+```bash
+npx tsc
+```
+
+Then run the compiled JavaScript:
+
+```bash
+node dist/run-agent.js
+```
+
+You should see your agent interacting with the tool and the LLM to answer the queries!
+
+## 7. Exposing via an HTTP API
+
+Cascade makes it easy to expose your registry over HTTP using an Express adapter.
+
+Create `src/server.ts`:
+
+```typescript filename="src/server.ts"
+import express from "express";
+import { t, AppContext } from "./cascade"; // Assuming t is exported from cascade.ts
+import * as cascadeExpress from "@cascade/core/adapters/express";
+import { registry } from "./registry"; // Your registry
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+
+// Define how to create context for each request
+const createContext = ({
+  req,
+  res,
+}: {
+  req: express.Request;
+  res: express.Response;
+}): AppContext => {
+  // You can extract user info, API keys from headers, etc.
+  return {
+    env: process.env.NODE_ENV || "production",
+    // Potentially extract from req.headers['x-api-key']
+    mockProductApiKey: req.headers["x-mock-api-key"] as string | undefined,
+  };
+};
+
+// Mount the Cascade middleware
+app.use(
+  "/cascade", // Base path for all Cascade endpoints
+  cascadeExpress.middleware({
+    instance: t, // The initialized Cascade instance
+    registry: registry, // Your application's registry
+    createContext,
+  }),
+);
+
+app.listen(port, () => {
+  console.log(`Cascade server listening on http://localhost:${port}/cascade`);
+});
+```
+
+Compile and run the server:
+
+```bash
+npx tsc
+node dist/server.js
+```
+
+Your Cascade API is now available at `http://localhost:3000/cascade`. You can explore available endpoints like `http://localhost:3000/cascade/agents/productInquiryAgent/invoke`.
+
+## 8. Using the Cascade Client
+
+Cascade provides a type-safe client to interact with your API.
+
+Create `src/client-example.ts`:
+
+```typescript filename="src/client-example.ts"
+import { createCascadeClient } from "@cascade/client";
+import type { AppRegistry } from "./registry"; // Import the registry type
+
+// The client is typed with your AppRegistry for full type safety!
+const client = createCascadeClient<AppRegistry>({
+  baseUrl: "http://localhost:3000/cascade", // URL of your Cascade server
+});
+
+async function queryAgentRemotely() {
+  console.log("Querying agent remotely...");
+  try {
+    const result = await client.agents.productInquiryAgent.invoke(
+      { query: "What is a gadget and how much does it cost?" },
+      // Optional: headers for context creation on the server
+      { headers: { "X-Mock-Api-Key": "client-side-key" } },
+    );
+    console.log("Remote Agent Response:", result.response);
+    console.log("Product Found:", result.productFound);
+
+    // Example: Calling a workflow
+    const workflowResult =
+      await client.workflows.exampleWorkflow.invoke("Test from client");
+    console.log("Remote Workflow Response:", workflowResult.message);
+  } catch (error) {
+    console.error("Client Error:", error);
+  }
+}
+
+queryAgentRemotely();
+```
+
+Compile and run the client example (ensure your server from step 7 is running):
+
+```bash
+npx tsc
+node dist/client-example.js
+```
+
+## Next Steps
+
+Congratulations! You've built and deployed your first Cascade agent. From here, you can explore:
+
+- **More Complex Workflows**: Chain multiple steps, use conditional logic, and manage state.
+- **Advanced Agent Features**: Streaming responses, memory, more sophisticated tool usage patterns.
+- **Error Handling and Retries**: Implement robust error handling within your tools and workflows.
+- **Custom Adapters**: Integrate Cascade with other message queues or server frameworks.
+- **Deployment**: Deploy your Cascade application to your preferred cloud provider.
+
+Dive into the rest of the documentation to learn more about Cascade's powerful features!
