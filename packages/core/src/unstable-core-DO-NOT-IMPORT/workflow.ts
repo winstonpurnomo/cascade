@@ -113,11 +113,7 @@ export class TWorkflowExecutor<
     let output = args;
 
     for (const step of this.steps) {
-      const stepOutput = await step.execute({
-        context,
-        input: output,
-        workflowContext,
-      });
+      const stepOutput = await step.call(output, context, workflowContext);
       workflowContext.setStepOutput(step.id, stepOutput);
       output = stepOutput;
     }

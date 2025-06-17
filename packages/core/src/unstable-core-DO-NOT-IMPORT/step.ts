@@ -56,4 +56,12 @@ export class TStep<
     this.dependencies = dependencies;
     this.execute = execute;
   }
+
+  call(
+    input: StandardSchemaV1.InferInput<TInput>,
+    context: TContext,
+    workflowContext: WorkflowContext,
+  ) {
+    return this.execute({ context, input, workflowContext });
+  }
 }
