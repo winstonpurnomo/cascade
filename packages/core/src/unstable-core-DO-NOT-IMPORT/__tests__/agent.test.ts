@@ -35,7 +35,7 @@ describe("Agent", () => {
       tools: [],
     });
 
-    const out = await agent.call("What is the answer?", { env: "test" });
+    const out = await agent.call("What is the answer?", { env: "test" }, t);
     expect(out).toEqual({ text: "The answer is 42" });
   });
 });
@@ -55,7 +55,7 @@ describe("Agent should work with any Standard Schema", () => {
       tools: [],
     });
 
-    const out = await agent.call("What is the answer?", { env: "test" });
+    const out = await agent.call("What is the answer?", { env: "test" }, t);
     expect(out).toEqual({ text: "The answer is 42" });
   });
 });

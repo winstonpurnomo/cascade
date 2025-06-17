@@ -5,6 +5,7 @@ import type { LanguageModelV1 } from "@ai-sdk/provider";
 import { generateObject, jsonSchema } from "ai";
 import { toJsonSchema } from "@standard-community/standard-json";
 import { TArgs } from "./args.js";
+import type { CascadeInstance } from "./instance.js";
 
 type AgentInput =
   | string
@@ -62,6 +63,7 @@ export class TAgent<
   async call(
     input: StandardSchemaV1.InferInput<TInput>,
     context: TContext,
+    cascade: CascadeInstance<TContext>,
   ): Promise<StandardSchemaV1.InferOutput<TOutput>> {
     const processedInput = await this.inputTransformer(input);
     // The AI SDK does not natively support Standard Schema, so we need to convert it to a JSON schema

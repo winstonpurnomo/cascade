@@ -80,13 +80,17 @@ export class CascadeInstance<
   newTool<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
     args: TToolArgs<TInput, TOutput, TContext>,
   ) {
-    return new TTool(args);
+    const tool = new TTool(args);
+    (this.instance.tools as any)[args.id] = tool;
+    return tool;
   }
 
   newAgent<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
     args: TAgentArgs<TInput, TOutput, TContext>,
   ) {
-    return new TAgent(args);
+    const agent = new TAgent(args);
+    (this.instance.agents as any)[args.id] = agent;
+    return agent;
   }
 
   newStep<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
@@ -99,6 +103,8 @@ export class CascadeInstance<
     TInput extends StandardSchemaV1,
     TOutput extends StandardSchemaV1,
   >(args: TWorkflowArgs<TInput, TOutput, TContext>) {
-    return new TWorkflow(args);
+    const workflow = new TWorkflow(args);
+    (this.instance.workflows as any)[args.id] = workflow as any;
+    return workflow;
   }
 }

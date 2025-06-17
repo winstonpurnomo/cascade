@@ -1,6 +1,7 @@
 import { TArgs } from "./args.js";
 import { BaseContext } from "./types.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import type { CascadeInstance } from "./instance.js";
 
 export type TToolArgs<
   TInput extends StandardSchemaV1,
@@ -10,9 +11,11 @@ export type TToolArgs<
   execute: ({
     context,
     input,
+    cascade,
   }: {
     context: TContext;
     input: StandardSchemaV1.InferInput<TInput>;
+    cascade: CascadeInstance<TContext>;
   }) =>
     | Promise<StandardSchemaV1.InferOutput<TOutput>>
     | StandardSchemaV1.InferOutput<TOutput>;
@@ -29,9 +32,11 @@ export class TTool<
   execute: ({
     context,
     input,
+    cascade,
   }: {
     context: TContext;
     input: StandardSchemaV1.InferInput<TInput>;
+    cascade: CascadeInstance<TContext>;
   }) =>
     | Promise<StandardSchemaV1.InferOutput<TOutput>>
     | StandardSchemaV1.InferOutput<TOutput>;
@@ -48,7 +53,11 @@ export class TTool<
     this.execute = execute;
   }
 
-  call(input: StandardSchemaV1.InferInput<TInput>, context: TContext) {
-    return this.execute({ context, input });
+  call(
+    input: StandardSchemaV1.InferInput<TInput>,
+    context: TContext,
+    cascade: CascadeInstance<TContext>,
+  ) {
+    return this.execute({ context, input, cascade });
   }
 }

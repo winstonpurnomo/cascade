@@ -3,6 +3,7 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { TStep, TStepArgs } from "./step.js";
 import { TArgs } from "./args.js";
 import { WorkflowContext } from "./workflow-context.js";
+import type { CascadeInstance } from "./instance.js";
 
 export type TWorkflowArgs<
   TInput extends StandardSchemaV1,
@@ -108,16 +109,18 @@ export class TWorkflowExecutor<
   public async call(
     args: StandardSchemaV1.InferInput<TInput>,
     context: TContext,
+    cascade: CascadeInstance<TContext>,
   ): Promise<StandardSchemaV1.InferOutput<TOutput>> {
     const workflowContext = new WorkflowContext();
     let output = args;
 
     for (const step of this.steps) {
-      const stepOutput = await step.execute({
+      const stepOutput = await step.call(
+        output,
         context,
-        input: output,
         workflowContext,
-      });
+        cascade,
+      );
       workflowContext.setStepOutput(step.id, stepOutput);
       output = stepOutput;
     }
