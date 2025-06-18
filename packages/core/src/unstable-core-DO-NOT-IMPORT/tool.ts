@@ -7,6 +7,7 @@ export type TToolArgs<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
+  TCascade extends CascadeInstance<TContext> = CascadeInstance<TContext>,
 > = TArgs<TInput, TOutput, TContext> & {
   execute: ({
     context,
@@ -15,7 +16,7 @@ export type TToolArgs<
   }: {
     context: TContext;
     input: StandardSchemaV1.InferInput<TInput>;
-    cascade: CascadeInstance<TContext>;
+    cascade: TCascade;
   }) =>
     | Promise<StandardSchemaV1.InferOutput<TOutput>>
     | StandardSchemaV1.InferOutput<TOutput>;
@@ -25,6 +26,7 @@ export class TTool<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
+  TCascade extends CascadeInstance<TContext> = CascadeInstance<TContext>,
 > {
   id: string;
   input: TInput;
@@ -36,7 +38,7 @@ export class TTool<
   }: {
     context: TContext;
     input: StandardSchemaV1.InferInput<TInput>;
-    cascade: CascadeInstance<TContext>;
+    cascade: TCascade;
   }) =>
     | Promise<StandardSchemaV1.InferOutput<TOutput>>
     | StandardSchemaV1.InferOutput<TOutput>;
@@ -46,7 +48,7 @@ export class TTool<
     input,
     output,
     execute,
-  }: TToolArgs<TInput, TOutput, TContext>) {
+  }: TToolArgs<TInput, TOutput, TContext, TCascade>) {
     this.id = id;
     this.input = input;
     this.output = output;
@@ -56,7 +58,7 @@ export class TTool<
   call(
     input: StandardSchemaV1.InferInput<TInput>,
     context: TContext,
-    cascade: CascadeInstance<TContext>,
+    cascade: TCascade,
   ) {
     return this.execute({ context, input, cascade });
   }

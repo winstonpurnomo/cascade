@@ -18,9 +18,10 @@ export class TWorkflow<
   TCurrentOutput extends StandardSchemaV1 = TInput,
   TOutput extends StandardSchemaV1 = TCurrentOutput,
   TContext extends BaseContext = BaseContext,
+  TCascade extends CascadeInstance<TContext> = CascadeInstance<TContext>,
   TBuilt extends TBuiltState = false,
 > {
-  private readonly steps: Array<TStep<any, any, TContext>> = [];
+  private readonly steps: Array<TStep<any, any, TContext, TCascade>> = [];
   private addedSteps: Set<string> = new Set();
   id: string;
   input: TInput;
@@ -34,9 +35,9 @@ export class TWorkflow<
   }
 
   public addStep<TNextOutput extends StandardSchemaV1>(
-    this: TWorkflow<TInput, TCurrentOutput, TOutput, TContext, false>,
-    step: TStep<TCurrentOutput, TNextOutput, TContext>,
-  ): TWorkflow<TInput, TNextOutput, TOutput, TContext, false> {
+    this: TWorkflow<TInput, TCurrentOutput, TOutput, TContext, TCascade, false>,
+    step: TStep<TCurrentOutput, TNextOutput, TContext, TCascade>,
+  ): TWorkflow<TInput, TNextOutput, TOutput, TContext, TCascade, false> {
     // Validate dependencies are already added
     for (const dependency of step.dependencies) {
       if (!this.addedSteps.has(dependency.id)) {
@@ -52,6 +53,7 @@ export class TWorkflow<
       TNextOutput,
       TOutput,
       TContext,
+      TCascade,
       false
     >({
       id: this.id,
@@ -68,8 +70,8 @@ export class TWorkflow<
   }
 
   public build(
-    this: TWorkflow<TInput, TOutput, TOutput, TContext, false>,
-  ): TWorkflowExecutor<TInput, TOutput, TContext> {
+    this: TWorkflow<TInput, TOutput, TOutput, TContext, TCascade, false>,
+  ): TWorkflowExecutor<TInput, TOutput, TContext, TCascade> {
     return new TWorkflowExecutor({
       id: this.id,
       input: this.input,
@@ -83,8 +85,9 @@ export class TWorkflowExecutor<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
+  TCascade extends CascadeInstance<TContext> = CascadeInstance<TContext>,
 > {
-  private readonly steps: Array<TStep<any, any, TContext>>;
+  private readonly steps: Array<TStep<any, any, TContext, TCascade>>;
   readonly id: string;
   readonly input: TInput;
   readonly output: TOutput;
@@ -98,7 +101,7 @@ export class TWorkflowExecutor<
     id: string;
     input: TInput;
     output: TOutput;
-    steps: Array<TStep<any, any, TContext>>;
+    steps: Array<TStep<any, any, TContext, TCascade>>;
   }) {
     this.id = id;
     this.input = input;
@@ -109,7 +112,7 @@ export class TWorkflowExecutor<
   public async call(
     args: StandardSchemaV1.InferInput<TInput>,
     context: TContext,
-    cascade: CascadeInstance<TContext>,
+    cascade: TCascade,
   ): Promise<StandardSchemaV1.InferOutput<TOutput>> {
     const workflowContext = new WorkflowContext();
     let output = args;

@@ -8,6 +8,7 @@ export type TStepArgs<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
+  TCascade extends CascadeInstance<TContext> = CascadeInstance<TContext>,
 > = TArgs<TInput, TOutput, TContext> & {
   dependencies?: ReadonlyArray<{ id: string; output: StandardSchemaV1 }>;
   execute: ({
@@ -19,7 +20,7 @@ export type TStepArgs<
     context: TContext;
     input: StandardSchemaV1.InferInput<TInput>;
     workflowContext: WorkflowContext;
-    cascade: CascadeInstance<TContext>;
+    cascade: TCascade;
   }) =>
     | Promise<StandardSchemaV1.InferOutput<TOutput>>
     | StandardSchemaV1.InferOutput<TOutput>;
@@ -29,6 +30,7 @@ export class TStep<
   TInput extends StandardSchemaV1,
   TOutput extends StandardSchemaV1,
   TContext extends BaseContext = BaseContext,
+  TCascade extends CascadeInstance<TContext> = CascadeInstance<TContext>,
 > {
   id: string;
   input: TInput;
@@ -38,10 +40,12 @@ export class TStep<
     context,
     input,
     workflowContext,
+    cascade,
   }: {
     context: TContext;
     input: StandardSchemaV1.InferInput<TInput>;
     workflowContext: WorkflowContext;
+    cascade: TCascade;
   }) =>
     | Promise<StandardSchemaV1.InferOutput<TOutput>>
     | StandardSchemaV1.InferOutput<TOutput>;
@@ -52,7 +56,7 @@ export class TStep<
     output,
     dependencies = [],
     execute,
-  }: TStepArgs<TInput, TOutput, TContext>) {
+  }: TStepArgs<TInput, TOutput, TContext, TCascade>) {
     this.id = id;
     this.input = input;
     this.output = output;
@@ -64,7 +68,7 @@ export class TStep<
     input: StandardSchemaV1.InferInput<TInput>,
     context: TContext,
     workflowContext: WorkflowContext,
-    cascade: CascadeInstance<TContext>,
+    cascade: TCascade,
   ) {
     return this.execute({ context, input, workflowContext, cascade });
   }
