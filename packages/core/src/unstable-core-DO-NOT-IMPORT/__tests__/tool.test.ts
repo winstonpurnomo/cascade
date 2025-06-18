@@ -8,14 +8,15 @@ describe("Tool", () => {
       id: "testTool",
       input: z.string(),
       output: z.string(),
-      execute: ({ context, input }) => {
+      execute: ({ context, input, cascade }) => {
         expect(input).toBe("Some string");
         expect(context.env).toBe("test");
+        expect(cascade).toBe(t);
         return `The answer is ${input}`;
       },
     });
 
-    let out = tool.call("Some string", { env: "test" });
+    let out = tool.call("Some string", { env: "test" }, t);
     if (out instanceof Promise) {
       out = await out;
     }
