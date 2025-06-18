@@ -7,9 +7,11 @@ import { TWorkflow, TWorkflowArgs } from "./workflow.js";
 
 export class CascadeInstance<
   TContext extends BaseContext = BaseContext,
-  TAgents extends Record<string, TAgent<any, any, TContext>> = {},
-  TWorkflows extends Record<string, TWorkflow<any, any, any, TContext>> = {},
-  TTools extends Record<string, TTool<any, any, TContext>> = {},
+  TAgents extends { [K in keyof TAgents]: TAgent<any, any, TContext> } = {},
+  TWorkflows extends {
+    [K in keyof TWorkflows]: TWorkflow<any, any, any, TContext>
+  } = {},
+  TTools extends { [K in keyof TTools]: TTool<any, any, TContext> } = {},
 > {
   instance: {
     agents: TAgents;
@@ -26,12 +28,15 @@ export class CascadeInstance<
   }
 
   registry<
-    const TNewAgents extends Record<string, TAgent<any, any, TContext>>,
-    const TNewWorkflows extends Record<
-      string,
-      TWorkflow<any, any, any, TContext>
-    >,
-    const TNewTools extends Record<string, TTool<any, any, TContext>>,
+    const TNewAgents extends {
+      [K in keyof TNewAgents]: TAgent<any, any, TContext>
+    },
+    const TNewWorkflows extends {
+      [K in keyof TNewWorkflows]: TWorkflow<any, any, any, TContext>
+    },
+    const TNewTools extends {
+      [K in keyof TNewTools]: TTool<any, any, TContext>
+    },
   >(config: {
     agents: TNewAgents;
     workflows: TNewWorkflows;
@@ -78,19 +83,41 @@ export class CascadeInstance<
   }
 
   newTool<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
-    args: TToolArgs<TInput, TOutput, TContext>,
+    this: CascadeInstance<TContext, TAgents, TWorkflows, TTools>,
+    args: TToolArgs<
+      TInput,
+      TOutput,
+      TContext,
+      CascadeInstance<TContext, TAgents, TWorkflows, TTools>
+    >,
   ) {
-    return new TTool(args);
+    const tool = new TTool(args);
+    (this.instance.tools as any)[args.id] = tool;
+    return tool;
   }
 
   newAgent<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
+    this: CascadeInstance<TContext, TAgents, TWorkflows, TTools>,
     args: TAgentArgs<TInput, TOutput, TContext>,
   ) {
-    return new TAgent(args);
+    const agent = new TAgent<
+      TInput,
+      TOutput,
+      TContext,
+      CascadeInstance<TContext, TAgents, TWorkflows, TTools>
+    >(args);
+    (this.instance.agents as any)[args.id] = agent;
+    return agent;
   }
 
   newStep<TInput extends StandardSchemaV1, TOutput extends StandardSchemaV1>(
-    args: TStepArgs<TInput, TOutput, TContext>,
+    this: CascadeInstance<TContext, TAgents, TWorkflows, TTools>,
+    args: TStepArgs<
+      TInput,
+      TOutput,
+      TContext,
+      CascadeInstance<TContext, TAgents, TWorkflows, TTools>
+    >,
   ) {
     return new TStep(args);
   }
@@ -98,7 +125,15 @@ export class CascadeInstance<
   newWorkflow<
     TInput extends StandardSchemaV1,
     TOutput extends StandardSchemaV1,
-  >(args: TWorkflowArgs<TInput, TOutput, TContext>) {
-    return new TWorkflow(args);
+  >(this: CascadeInstance<TContext, TAgents, TWorkflows, TTools>, args: TWorkflowArgs<TInput, TOutput, TContext>) {
+    const workflow = new TWorkflow<
+      TInput,
+      TInput,
+      TOutput,
+      TContext,
+      CascadeInstance<TContext, TAgents, TWorkflows, TTools>
+    >(args);
+    (this.instance.workflows as any)[args.id] = workflow as any;
+    return workflow;
   }
 }
